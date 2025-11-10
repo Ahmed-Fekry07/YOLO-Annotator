@@ -4,7 +4,7 @@
 YOLO Annotator - Image Annotation Tool
 ===============================================================================
 
-A lightweight image annotation tool for creating YOLO format
+A lightweight, image annotation tool for creating YOLO format
 datasets. Designed for marine survey data, side-scan sonar imagery, and 
 large-format scientific images.
 
@@ -79,6 +79,7 @@ class ResizeHandle(QGraphicsRectItem):
         self.setCursor(Qt.CursorShape.SizeAllCursor)
         
         self.start_rect = None
+        self.start_pos = None
     
     def mousePressEvent(self, event):
         """Handle mouse press - store initial state for resizing."""
@@ -109,6 +110,9 @@ class ResizeHandle(QGraphicsRectItem):
                 # Update handle positions
                 if hasattr(self.scene(), 'update_resize_handles'):
                     self.scene().update_resize_handles()
+                # Update label position and size
+                if hasattr(self.scene(), 'update_box_label'):
+                    self.scene().update_box_label(self.parent_bbox)
 
 
 # ============================================================================
@@ -599,7 +603,10 @@ class AnnotationScene(QGraphicsScene):
         if self.editing_box:
             # Update the BoundingBox rect from graphics item
             if self.editing_box.graphics_item:
-                self.editing_box.rect = self.editing_box.graphics_item.rect()
+                # Get the item's rectangle in scene coordinates
+                item = self.editing_box.graphics_item
+                rect_in_scene = item.mapRectToScene(item.rect())
+                self.editing_box.rect = rect_in_scene
                 
                 # Reset to normal appearance
                 color = self.get_box_color(self.editing_box.class_id)
@@ -675,6 +682,47 @@ class AnnotationScene(QGraphicsScene):
         box_item.setData(1, bg_rect)
         
         return text_item
+    
+    def update_box_label(self, box_item: QGraphicsRectItem):
+        """
+        Update the label position and font size for a box during resize.
+        
+        Args:
+            box_item: The graphics rectangle item whose label needs updating
+        """
+        # Get existing label items
+        text_item = box_item.data(0)  # Text item
+        bg_rect = box_item.data(1)    # Background rectangle
+        
+        if not text_item or not bg_rect:
+            return
+        
+        # Update font size based on new box height
+        from PyQt6.QtGui import QFont
+        font = QFont()
+        box_height = box_item.rect().height()
+        font_size = int(box_height / 15)
+        font_size = max(7, min(font_size, 14))
+        font.setPointSize(font_size)
+        font.setBold(True)
+        text_item.setFont(font)
+        
+        # Recalculate text dimensions
+        text_rect = text_item.boundingRect()
+        padding = 3
+        
+        # Update background size
+        label_width = text_rect.width() + (padding * 2)
+        label_height = text_rect.height() + (padding * 2)
+        bg_rect.setRect(0, 0, label_width, label_height)
+        
+        # Update positions relative to box
+        box_rect = box_item.rect()
+        bg_rect.setPos(box_rect.left(), box_rect.top() - label_height)
+        text_item.setPos(
+            box_rect.left() + padding,
+            box_rect.top() - label_height + padding
+        )
     
     # ========================================================================
     # UNDO/REDO FUNCTIONALITY
@@ -1844,13 +1892,7 @@ class MainWindow(QMainWindow):
             )
     
     def load_annotations(self):
-        """Load existing annotations from YOLO format file - only if explicitly requested."""
-        # Don't auto-load - start with clean session
-        # User can manually load if they want to continue previous work
-        return
-        
-        # Original code kept for reference but disabled
-        """
+        """Load existing annotations from YOLO format file automatically."""
         if not self.current_image_path:
             return
         
@@ -1900,6 +1942,9 @@ class MainWindow(QMainWindow):
                         # No brush - outline only
                         self.scene.addItem(item)
                         
+                        # Add label
+                        self.scene.add_box_label(item, bbox.class_name, color)
+                        
                         bbox.graphics_item = item
                         self.scene.boxes.append(bbox)
             
@@ -1911,7 +1956,6 @@ class MainWindow(QMainWindow):
                 self, "Warning",
                 f"Failed to load annotations: {str(e)}"
             )
-        """
     
     def set_labels_directory(self):
         """Internal method - set labels directory."""
