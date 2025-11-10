@@ -13,7 +13,7 @@ pip install PyQt6 Pillow pyinstaller
 ### Step 1: Prepare Files
 
 Ensure you have:
-- `annotator_professional.py`
+- `app.py`
 - `annotator.spec`
 - `yolo_annotator_logo.ico`
 
