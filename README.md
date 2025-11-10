@@ -73,7 +73,7 @@ python app.py
    ![YOLO Annotator Screenshot](Screenshot.png)
    *Example: Annotating a shipwreck in side-scan sonar imagery*
    
-   **Dataset Credit:** Side-scan sonar imagery from [AI4Shipwrecks](https://github.com/MITeam/AI4Shipwrecks) repository.
+   **Dataset Credit:** Side-scan sonar imagery from [AI4Shipwrecks]((https://github.com/umfieldrobotics/ai4shipwrecks)) repository.
 
 ## 📄 License
 
