@@ -10,7 +10,7 @@ large-format scientific images.
 
 Author: Ahmed Fekry
 LinkedIn: www.linkedin.com/in/ahmed-fekry07
-Version: 2.7
+Version: 1.0
 License: MIT
 Date: November 2025
 
