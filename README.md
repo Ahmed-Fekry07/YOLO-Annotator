@@ -56,10 +56,15 @@ python annotator_professional.py
 |----------|--------|
 | Ctrl+O | Open image |
 | Ctrl+D | Open directory |
+| Ctrl+S | Save annotations |
 | D / A | Next / Previous image |
 | Ctrl+Z | Undo |
+| Ctrl+Y | Redo |
 | Delete | Delete annotation |
 | F | Fit to window |
+| Mouse Wheel | Zoom in/out |
+| Right-click + Drag | Pan image |
+| Left-click + Drag | Create bounding box |
 
 ---
 
