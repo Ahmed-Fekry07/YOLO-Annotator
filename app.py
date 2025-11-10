@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
 ===============================================================================
-YOLO Annotator - Professional Image Annotation Tool
+YOLO Annotator - Image Annotation Tool
 ===============================================================================
 
-A lightweight, professional image annotation tool for creating YOLO format
+A lightweight image annotation tool for creating YOLO format
 datasets. Designed for marine survey data, side-scan sonar imagery, and 
 large-format scientific images.
 
@@ -619,7 +619,7 @@ class AnnotationScene(QGraphicsScene):
     def add_box_label(self, box_item: QGraphicsRectItem, class_name: str, color: QColor):
         """
         Add a text label showing the class name on the box.
-        Label appears in a small box at the top-left corner, just like professional tools.
+        Label appears in a small box at the top-left corner.
         
         Args:
             box_item: The graphics rectangle item
@@ -922,7 +922,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         """Initialize the main window and set up the UI."""
         super().__init__()
-        self.setWindowTitle("YOLO Annotator - Professional Image Annotation Tool")
+        self.setWindowTitle("YOLO Annotator - Image Annotation Tool")
         self.setGeometry(100, 100, 1400, 900)
         
         # File paths and state
