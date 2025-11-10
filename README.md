@@ -69,11 +69,11 @@ python annotator_professional.py
 ---
 
 ## 📸 Screenshot
-
-![YOLO Annotator Screenshot](screenshot.png)
-*Example: Annotating a shipwreck in side-scan sonar imagery*
-
-**Dataset Credit:** Side-scan sonar imagery from [AI4Shipwrecks](https://github.com/MITeam/AI4Shipwrecks) repository.
+   
+   ![YOLO Annotator Screenshot](screenshot.png)
+   *Example: Annotating a shipwreck in side-scan sonar imagery*
+   
+   **Dataset Credit:** Side-scan sonar imagery from [AI4Shipwrecks](https://github.com/MITeam/AI4Shipwrecks) repository.
 
 ## 📄 License
 
