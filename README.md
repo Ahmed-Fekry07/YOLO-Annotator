@@ -13,7 +13,7 @@
 
 ## 📋 About
 
-YOLO Annotator is a lightweight, professional **manual** image annotation tool specifically designed for creating YOLO format datasets. Users interactively draw and label bounding boxes to create training data for object detection models.
+YOLO Annotator is a lightweight **manual** image annotation tool specifically designed for creating YOLO format datasets. Users interactively draw and label bounding boxes to create training data for object detection models.
 
 **Author:** Ahmed Fekry  
 **LinkedIn:** [www.linkedin.com/in/ahmed-fekry07](https://www.linkedin.com/in/ahmed-fekry07)  
