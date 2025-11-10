@@ -63,7 +63,7 @@ python annotator_professional.py
 | Delete | Delete annotation |
 | F | Fit to window |
 | Mouse Wheel | Zoom in/out |
-| Right-click + Drag | Pan image |
+| Middle-click + Drag | Pan image |
 | Left-click + Drag | Create bounding box |
 
 ---
