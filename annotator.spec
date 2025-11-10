@@ -13,7 +13,7 @@ This will create a single-file executable in the dist/ folder.
 block_cipher = None
 
 a = Analysis(
-    ['annotator_professional.py'],
+    ['app.py'],
     pathex=[],
     binaries=[],
     datas=[
@@ -56,7 +56,7 @@ exe = EXE(
     version_info={
         'version': '1.0',
         'Author': 'Ahmed Fekry',
-        'file_description': 'YOLO Annotator - Professional Image Annotation Tool',
+        'file_description': 'YOLO Annotator - Image Annotation Tool',
         'internal_name': 'YOLO_Annotator',
         'legal_copyright': '© 2025 Ahmed Fekry. Licensed under MIT.',
         'original_filename': 'YOLO_Annotator.exe',
