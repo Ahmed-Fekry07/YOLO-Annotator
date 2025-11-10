@@ -45,7 +45,7 @@ Download `YOLO_Annotator.exe` from releases - no installation needed!
 
 ```bash
 pip install PyQt6 Pillow
-python annotator_professional.py
+python app.py
 ```
 
 ---
