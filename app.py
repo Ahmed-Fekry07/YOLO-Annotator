@@ -1362,10 +1362,16 @@ class MainWindow(QMainWindow):
         if class_id < len(self.classes):
             self.classes.insert(class_id, class_name)
         else:
-            # Fill gaps if necessary
-            while len(self.classes) < class_id:
-                self.classes.append(f"unused_{len(self.classes)}")
+            # Extend list to accommodate the new class ID
+            # Simply append the class at the end
             self.classes.append(class_name)
+            # Warn user if there's a gap
+            if class_id != len(self.classes) - 1:
+                QMessageBox.warning(
+                    self, "Class ID Adjusted",
+                    f"Class ID adjusted from {class_id} to {len(self.classes) - 1}\n\n"
+                    f"Classes must be consecutive. Add intermediate classes first if needed."
+                )
         
         # Store custom color
         self.class_colors[class_id] = color
