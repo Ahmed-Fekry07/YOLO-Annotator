@@ -983,7 +983,8 @@ class MainWindow(QMainWindow):
         self.unsaved_changes: bool = False
         
         # Classes management
-        self.classes: List[str] = []
+        self.classes: List[str] = []  # For backwards compatibility and display
+        self.class_id_map: dict = {}  # Maps class_id (int) -> class_name (str) - allows arbitrary IDs
         self.class_colors: dict = {}  # class_id -> QColor mapping
         
         # Setup UI components
@@ -1249,12 +1250,15 @@ class MainWindow(QMainWindow):
     
     def on_class_changed(self, index: int):
         """Handle class selection change."""
-        if 0 <= index < len(self.classes):
-            class_name = self.classes[index]
+        # Get the sorted list of class IDs to find which one was selected
+        sorted_ids = sorted(self.class_id_map.keys())
+        if 0 <= index < len(sorted_ids):
+            class_id = sorted_ids[index]
+            class_name = self.class_id_map[class_id]
             # Get custom color if available
-            color = self.class_colors.get(index, None)
-            self.scene.set_current_class(index, class_name, color)
-            self.statusBar().showMessage(f"Current class: [{index}] {class_name}")
+            color = self.class_colors.get(class_id, None)
+            self.scene.set_current_class(class_id, class_name, color)
+            self.statusBar().showMessage(f"Current class: [{class_id}] {class_name}")
     
     def on_box_created(self):
         """Handle new box creation."""
@@ -1329,15 +1333,15 @@ class MainWindow(QMainWindow):
         class_name = class_name.strip()
         
         # Check if class already exists
-        if class_name in self.classes:
+        if class_name in self.class_id_map.values():
             QMessageBox.warning(
                 self, "Duplicate Class",
                 f"Class '{class_name}' already exists."
             )
             return
         
-        # Get class ID
-        default_id = len(self.classes)
+        # Get class ID - suggest next available ID
+        default_id = max(self.class_id_map.keys()) + 1 if self.class_id_map else 0
         class_id, ok = QInputDialog.getInt(
             self, "Class ID",
             f"Enter class ID for '{class_name}':",
@@ -1358,29 +1362,22 @@ class MainWindow(QMainWindow):
             # User cancelled color selection - use default
             color = self.scene.get_box_color(class_id)
         
-        # Add class
-        if class_id < len(self.classes):
-            self.classes.insert(class_id, class_name)
-        else:
-            # Extend list to accommodate the new class ID
-            # Simply append the class at the end
-            self.classes.append(class_name)
-            # Warn user if there's a gap
-            if class_id != len(self.classes) - 1:
-                QMessageBox.warning(
-                    self, "Class ID Adjusted",
-                    f"Class ID adjusted from {class_id} to {len(self.classes) - 1}\n\n"
-                    f"Classes must be consecutive. Add intermediate classes first if needed."
-                )
+        # Add class to the ID map (allows arbitrary IDs)
+        self.class_id_map[class_id] = class_name
+        
+        # Update classes list for backwards compatibility
+        # We'll rebuild it sorted by class_id for display
+        sorted_ids = sorted(self.class_id_map.keys())
+        self.classes = [self.class_id_map[cid] for cid in sorted_ids]
         
         # Store custom color
         self.class_colors[class_id] = color
         self.scene.set_class_color(class_id, color)
         
-        # Refresh classes list with color indicator
+        # Refresh classes list display with actual class IDs
         self.classes_list.clear()
-        for i, cls in enumerate(self.classes):
-            self.classes_list.addItem(f"[{i}] {cls}")
+        for cid in sorted_ids:
+            self.classes_list.addItem(f"[{cid}] {self.class_id_map[cid]}")
         
         self.statusBar().showMessage(f"Added class: {class_name} with ID {class_id}")
     
@@ -1388,17 +1385,20 @@ class MainWindow(QMainWindow):
         """Remove selected annotation class."""
         current_row = self.classes_list.currentRow()
         
-        if current_row < 0 or current_row >= len(self.classes):
+        # Get sorted class IDs to find which one is selected
+        sorted_ids = sorted(self.class_id_map.keys())
+        if current_row < 0 or current_row >= len(sorted_ids):
             QMessageBox.information(
                 self, "No Selection",
                 "Please select a class to remove."
             )
             return
         
-        class_name = self.classes[current_row]
+        class_id = sorted_ids[current_row]
+        class_name = self.class_id_map[class_id]
         
         # Check if class is in use
-        in_use = any(bbox.class_id == current_row for bbox in self.scene.boxes)
+        in_use = any(bbox.class_id == class_id for bbox in self.scene.boxes)
         
         if in_use:
             reply = QMessageBox.question(
@@ -1415,27 +1415,25 @@ class MainWindow(QMainWindow):
             # Remove boxes with this class
             indices_to_remove = [
                 i for i, bbox in enumerate(self.scene.boxes)
-                if bbox.class_id == current_row
+                if bbox.class_id == class_id
             ]
             
             if indices_to_remove:
                 self.scene.delete_selected_boxes(indices_to_remove)
         
-        # Remove class
-        self.classes.pop(current_row)
+        # Remove class from map
+        del self.class_id_map[class_id]
         
-        # Update all boxes with higher class IDs
-        for bbox in self.scene.boxes:
-            if bbox.class_id > current_row:
-                bbox.class_id -= 1
-                # Update class name
-                if bbox.class_id < len(self.classes):
-                    bbox.class_name = self.classes[bbox.class_id]
+        # Rebuild classes list
+        sorted_ids = sorted(self.class_id_map.keys())
+        self.classes = [self.class_id_map[cid] for cid in sorted_ids]
+        
+        # Note: We don't update class IDs of other boxes since IDs can be arbitrary
         
         # Refresh UI
         self.classes_list.clear()
-        for i, cls in enumerate(self.classes):
-            self.classes_list.addItem(f"[{i}] {cls}")
+        for cid in sorted_ids:
+            self.classes_list.addItem(f"[{cid}] {self.class_id_map[cid]}")
         
         # Select first class if any remain
         if self.classes:
@@ -1519,12 +1517,34 @@ class MainWindow(QMainWindow):
         
         try:
             with open(self.class_file_path, 'r') as f:
-                self.classes = [line.strip() for line in f if line.strip()]
+                lines = [line.strip() for line in f if line.strip()]
             
-            # Refresh classes list
+            # Clear existing classes
+            self.classes = []
+            self.class_id_map = {}
+            
+            # Parse each line - could be just name or "[id] name"
+            for i, line in enumerate(lines):
+                if line.startswith('[') and ']' in line:
+                    # Format: [id] name
+                    bracket_end = line.index(']')
+                    class_id = int(line[1:bracket_end])
+                    class_name = line[bracket_end+1:].strip()
+                else:
+                    # Format: just name (use sequential ID)
+                    class_id = i
+                    class_name = line
+                
+                self.class_id_map[class_id] = class_name
+            
+            # Rebuild classes list sorted by ID
+            sorted_ids = sorted(self.class_id_map.keys())
+            self.classes = [self.class_id_map[cid] for cid in sorted_ids]
+            
+            # Refresh classes list display
             self.classes_list.clear()
-            for i, cls in enumerate(self.classes):
-                self.classes_list.addItem(f"[{i}] {cls}")
+            for cid in sorted_ids:
+                self.classes_list.addItem(f"[{cid}] {self.class_id_map[cid]}")
             
             if self.classes:
                 self.classes_list.setCurrentRow(0)
@@ -1925,9 +1945,9 @@ class MainWindow(QMainWindow):
                     
                     class_id = int(parts[0])
                     
-                    # Get class name
-                    if 0 <= class_id < len(self.classes):
-                        class_name = self.classes[class_id]
+                    # Get class name from the map
+                    if class_id in self.class_id_map:
+                        class_name = self.class_id_map[class_id]
                     else:
                         class_name = f"class_{class_id}"
                     
