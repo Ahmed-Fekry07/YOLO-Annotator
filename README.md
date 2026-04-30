@@ -22,7 +22,7 @@ YOLO Annotator is a lightweight **manual** image annotation tool specifically de
 
 ---
 
-## ✨ Features
+## Features
 
 - ✅ **YOLO Format Output** - Industry-standard format
 - ✅ **Multi-Class Support** - Unlimited classes with custom IDs
@@ -35,7 +35,7 @@ YOLO Annotator is a lightweight **manual** image annotation tool specifically de
 
 ---
 
-## 🚀 Installation
+## Installation
 
 ### Windows Executable (Recommended)
 
@@ -50,7 +50,7 @@ python app.py
 
 ---
 
-## ⌨️ Keyboard Shortcuts
+## Keyboard Shortcuts
 
 | Shortcut | Action |
 |----------|--------|
@@ -68,14 +68,14 @@ python app.py
 
 ---
 
-## 📸 Screenshot
+## Screenshot
    
    ![YOLO Annotator Screenshot](Screenshot.png)
    *Example: Annotating a shipwreck in side-scan sonar imagery*
    
    **Dataset Credit:** Side-scan sonar imagery from [AI4Shipwrecks](https://github.com/umfieldrobotics/ai4shipwrecks) repository.
 
-## 📄 License
+## License
 
 MIT License - Copyright (c) 2025 Ahmed Fekry
 
